@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 import loadImage from 'blueimp-load-image';
 import { InferenceSession } from 'onnxjs';
 
-import { runModelUtils } from './utils';
-import { preProcess } from './utils/models/squeezenet';
+import * as runModelUtils from './utils/runModel';
+import * as imageProcessingUtils from './utils/imageProcessing';
+import { getPredictedClass } from './utils';
+
 import { SQUEEZENET_IMAGE_URLS as data } from './data/sample-image-url';
 
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
 
 const INITIAL_STATE = {
@@ -21,12 +23,15 @@ const INITIAL_STATE = {
       size: 0,
     },
     modelLoading: false,
+    modelLoaded: false,
+    backendHint: 'webgl',
 }
 
 class App extends Component {
   state = { ...INITIAL_STATE };
   // session = InferenceSession();
-  session = new InferenceSession();
+  imageSize = 224;
+  session = new InferenceSession({backendHint: this.state.backendHint});
 
   init() {
     this.setState(INITIAL_STATE);
@@ -44,28 +49,31 @@ class App extends Component {
     try {
       const element = document.getElementById('input-canvas') as HTMLCanvasElement;
       const ctx = element.getContext('2d') as CanvasRenderingContext2D; 
-      const preProcessedData = preProcess(ctx);
-      this.setState({
-        modelLoading: true,
-      });
-      console.log(preProcessedData);
-      await this.session.loadModel('./models/squeezenet1_1.onnx');
+      const preProcessedData = imageProcessingUtils.preProcess(ctx);
+      if (!this.state.modelLoaded) {
+        this.setState({
+          modelLoading: true,
+        });
+        await this.session.loadModel('./squeezenet1_1.onnx');
+        this.setState({
+          modelLoaded: true,
+          modelLoading: false,
+        });
+      }
       let [tensorOutput, inferenceTime] = await runModelUtils.runModel(this.session, preProcessedData);
       if (!!tensorOutput) {
         this.setState({
           output: tensorOutput.data,
           sessionRunning: false,
           inferenceTime,
+        }, () => {
+          console.log(getPredictedClass(tensorOutput.data as Float32Array), inferenceTime)
         });
       }
     }
     catch(e) {
-      console.log(e);
+      console.warn(e);
     }
-  }
-
-  preProcess(ctx: CanvasRenderingContext2D): any {
-    throw new Error("Method not implemented.");
   }
 
   loadImageToCanvas(url: string) {
@@ -86,29 +94,28 @@ class App extends Component {
               imageLoadingError: true,
             });
         } else {
-            // load image data onto input canvas
-            const element = document.getElementById('input-canvas') as HTMLCanvasElement;
-            if (element) {
-              const ctx = element.getContext('2d');
-              if (ctx) {
-                ctx.drawImage(img as HTMLImageElement, 0, 0);
-                this.setState({
-                  imageLoadingError: false,
-                  imageLoading: false,
-                  sessionRunning: true,
-                  output: [],
-                  inferenceTime: 0,
-                }, () => {
-                  this.runModel();
-                });
-              }
+          const element = document.getElementById('input-canvas') as HTMLCanvasElement;
+          if (element) {
+            const ctx = element.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img as HTMLImageElement, 0, 0);
+              this.setState({
+                imageLoadingError: false,
+                imageLoading: false,
+                sessionRunning: true,
+                output: [],
+                inferenceTime: 0,
+              }, () => {
+                this.runModel();
+              });
             }
+          }
         }},
         {
-          maxWidth: 300,
-          maxHeight: 150,
-          cover: false,
-          crop: false,
+          maxWidth: this.imageSize,
+          maxHeight: this.imageSize,
+          cover: true,
+          crop: true,
           canvas: true,
           crossOrigin: 'Anonymous',
         }
@@ -119,16 +126,16 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
+          {/* <img src={logo} className="App-logo" alt="logo" /> */}
+            {/* <p>
+              Edit <code>src/App.tsx</code> and save to reload.
+            </p> */}
           <select onChange={(e) => this.loadImageToCanvas(e.target.value)}>
             {data.map((item) => (
               <option key={item.value} value={item.value}>{item.text}</option>
             ))}
           </select>
-          <canvas id="input-canvas" />
+          <canvas id="input-canvas" width={this.imageSize} height={this.imageSize} />
         </header>
       </div>
     );

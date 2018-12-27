@@ -30,7 +30,6 @@ export async function runModel(model: InferenceSession, preProcessedData: Tensor
         const end = new Date();
         const inferenceTime = (end.getTime() - start.getTime());
         const output = outputData.values().next().value;
-
         return [output, inferenceTime];
     } catch (e) {
         console.error(e);

@@ -9,7 +9,6 @@ export function imagenetClassesTopK(classProbabilities: any, k = 5) {
       Array.prototype.slice.call(classProbabilities) : classProbabilities;
 
   const sorted = _.reverse(_.sortBy(probs.map((prob: any, index: number) => [prob, index]), probIndex => probIndex[0]));
-
   const topK = _.take(sorted, k).map(probIndex => {
     const iClass = imagenetClasses[probIndex[1]];
     return {
