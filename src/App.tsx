@@ -7,24 +7,24 @@ import * as imageProcessingUtils from './utils/imageProcessing';
 import { getPredictedClass } from './utils';
 
 import { SQUEEZENET_IMAGE_URLS as data } from './data/sample-image-url';
+import * as Styled from './Styled';
+import Loader from './components/Loader';
 
-// import logo from './logo.svg';
-import './App.css';
+interface OutputItem {
+  id: string;
+  probability: number;
+  name: string;
+}
 
 const INITIAL_STATE = {
     sessionRunning: false,
     inferenceTime: 0,
-    imageURLInput: '',
-    imageURLSelect: null,
-    imageLoading: false,
-    imageLoadingError: false,
+    error: false,
     output: [],
-    image: {
-      size: 0,
-    },
     modelLoading: false,
     modelLoaded: false,
     backendHint: 'webgl',
+    selectedImage: null,
 }
 
 class App extends Component {
@@ -63,11 +63,9 @@ class App extends Component {
       let [tensorOutput, inferenceTime] = await runModelUtils.runModel(this.session, preProcessedData);
       if (!!tensorOutput) {
         this.setState({
-          output: tensorOutput.data,
+          output: getPredictedClass(tensorOutput.data as Float32Array),
           sessionRunning: false,
           inferenceTime,
-        }, () => {
-          console.log(getPredictedClass(tensorOutput.data as Float32Array), inferenceTime)
         });
       }
     }
@@ -82,7 +80,9 @@ class App extends Component {
         return;
     }
     this.setState({
-      imageLoading: true,
+      sessionRunning: true,
+      output: [],
+      selectedImage: url,
     });
 
     loadImage(
@@ -90,8 +90,10 @@ class App extends Component {
         (img: Event | HTMLImageElement) => {
         if ((img as Event).type === 'error') {
             this.setState({
-              imageLoading: false,
-              imageLoadingError: true,
+              sessionRunning: false,
+              error: 'Unable to load image in canvas',
+              output: [],
+              inferenceTime: 0,
             });
         } else {
           const element = document.getElementById('input-canvas') as HTMLCanvasElement;
@@ -100,10 +102,7 @@ class App extends Component {
             if (ctx) {
               ctx.drawImage(img as HTMLImageElement, 0, 0);
               this.setState({
-                imageLoadingError: false,
-                imageLoading: false,
-                sessionRunning: true,
-                output: [],
+                error: 'Something went wrong during detection',
                 inferenceTime: 0,
               }, () => {
                 this.runModel();
@@ -124,20 +123,25 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          {/* <img src={logo} className="App-logo" alt="logo" /> */}
-            {/* <p>
-              Edit <code>src/App.tsx</code> and save to reload.
-            </p> */}
-          <select onChange={(e) => this.loadImageToCanvas(e.target.value)}>
-            {data.map((item) => (
-              <option key={item.value} value={item.value}>{item.text}</option>
-            ))}
-          </select>
-          <canvas id="input-canvas" width={this.imageSize} height={this.imageSize} />
-        </header>
-      </div>
+      <React.Fragment>
+        <canvas id="input-canvas" width={this.imageSize} height={this.imageSize} />
+        <Styled.Heading>ONNX - Heartbeat</Styled.Heading>
+        <Styled.ImagesRow>
+          {data.map((item) => (
+            <Styled.ImageContainer data-selected={this.state.selectedImage === item.value} data-background={item.value} key={item.value} onClick={() => this.loadImageToCanvas(item.value)} />
+          ))}
+        </Styled.ImagesRow>
+          <Styled.ResultContainer>
+            {this.state.output ? 
+            this.state.output.map((item: OutputItem) => {
+              return (<Styled.ResultItem key={item.id}>
+                <p>{item.name}</p>
+                <span>{(item.probability * 100).toFixed(2)}</span>
+              </Styled.ResultItem>);
+            }) : null}
+            {this.state.sessionRunning && <Loader />}
+          </Styled.ResultContainer>
+      </React.Fragment>
     );
   }
 }
