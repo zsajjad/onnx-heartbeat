@@ -35,19 +35,6 @@ export const SQUEEZENET_IMAGE_URLS = [
   { text: 'wine', value: 'https://farm4.staticflickr.com/3827/11349066413_99c32dee4a_z_d.jpg' },
 ];
 
-// export const EMOTION_IMAGE_URLS = [    
-//   { text: 'happy girl', value: require('@/assets/EmotionSampleImages/happy.jpg')},
-//   { text: 'angry man', value: require('@/assets/EmotionSampleImages/angry_man.jpg')},
-//   { text: 'angry baby', value: require('@/assets/EmotionSampleImages/angry_baby.jpg')},
-//   { text: 'suprised boy', value: require('@/assets/EmotionSampleImages/surprised_boy.jpg')},
-//   { text: 'suprised woman', value: require('@/assets/EmotionSampleImages/surprised_woman.jpg')},
-//   { text: 'sad baby', value: require('@/assets/EmotionSampleImages/sad_baby.jpg')},
-//   { text: 'sad baby 2', value: require('@/assets/EmotionSampleImages/sad_baby2.jpg')},
-//   { text: 'fear', value: require('@/assets/EmotionSampleImages/fear.jpg')},
-//   { text: 'neutral girl', value: require('@/assets/EmotionSampleImages/neutral.jpg')},
-//   { text: 'neutral girl 2', value: require('@/assets/EmotionSampleImages/neutral_girl.jpg')},
-// ];
-
 export const YOLO_IMAGE_URLS = [    
   { text: 'airplane', value: 'https://farm6.staticflickr.com/5590/14821526429_5c6ea60405_z_d.jpg' },
   { text: 'cat', value: 'https://i.imgur.com/CzXTtJV.jpg' },

@@ -5,6 +5,11 @@ export const Heading = styled.h1`
   text-align: center;
 `;
 
+export const Description = styled.p`
+  color: white;
+  text-align: center;
+`;
+
 export const ImagesRow = styled.div`
   flex-direction: row;
   flex-wrap: wrap;
@@ -54,9 +59,8 @@ export const ResultContainer = styled.div`
   position: fixed;
   bottom: 0;
   left: 0;
-  background-color: #003143;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.25);
-
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow-x: auto;
 `
 export const ResultItem = styled.div`
   padding: 8px 16px;
