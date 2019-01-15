@@ -23,7 +23,7 @@ const INITIAL_STATE = {
     output: [],
     modelLoading: false,
     modelLoaded: false,
-    backendHint: 'webgl',
+    backendHint: 'webgl', // ['webgl', 'wasm', 'cpu']
     selectedImage: null,
 }
 
@@ -31,7 +31,7 @@ class App extends Component {
   state = { ...INITIAL_STATE };
   // session = InferenceSession();
   imageSize = 224;
-  session = new InferenceSession({backendHint: this.state.backendHint});
+  session = new InferenceSession({ backendHint: this.state.backendHint });
 
   init() {
     this.setState(INITIAL_STATE);

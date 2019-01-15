@@ -2,6 +2,7 @@ import * as mathUtils from './math';
 import * as imagenetUtils from './imagenet';
 
 export function getPredictedClass(res: Float32Array): {} {
+  console.log(res);
   if (!res || res.length === 0) {
     const empty = [];
     for (let i = 0; i < 5; i++) {
